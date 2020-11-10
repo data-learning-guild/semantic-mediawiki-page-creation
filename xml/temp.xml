@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <channel>
+    <channel_id>CJCNV9LG2</channel_id>
+    <channel_name>03-01-質問-実務</channel_name>
+  </channel>
+  <reply_num>0</reply_num>
+  <user>
+    <user_id>URDDX224S</user_id>
+    <user_name>masso</user_name>
+  </user>
+  <reply_user_is_in_current>True</reply_user_is_in_current>
+  <talk>
+    <talk_id>204f1b6c-1b54-4370-ab84-c27d2ecd2b4b</talk_id>
+    <talk_text>&lt;@URDDX224S&gt;さんがチャンネル名を「03-1-質問-実務」から「03-01-質問-実務」に変更しました。</talk_text>
+    <talk_ts>2020-10-16 09:10:04.046300+00:00</talk_ts>
+  </talk>
+  <thread_ts>2020-10-16 09:10:04.046300+00:00</thread_ts>
+  <target_date>2020-10-17</target_date>
+  <channel>
+    <channel_id>C014QPLTKKN</channel_id>
+    <channel_name>03-02-質問-学習</channel_name>
+  </channel>
+  <reply_num>0</reply_num>
+  <user>
+    <user_id>URDDX224S</user_id>
+    <user_name>masso</user_name>
+  </user>
+  <reply_user_is_in_current>True</reply_user_is_in_current>
+  <talk>
+    <talk_id>6341e76c-59ff-45e1-bd89-f134b585fcbd</talk_id>
+    <talk_text>&lt;@URDDX224S&gt;さんがチャンネル名を「03-2-質問-学習」から「03-02-質問-学習」に変更しました。</talk_text>
+    <talk_ts>2020-10-16 09:10:28.023800+00:00</talk_ts>
+  </talk>
+  <thread_ts>2020-10-16 09:10:28.023800+00:00</thread_ts>
+  <target_date>2020-10-17</target_date>
+  <channel>
+    <channel_id>C014BS723RC</channel_id>
+    <channel_name>03-03-質問-その他</channel_name>
+  </channel>
+  <reply_num>0</reply_num>
+  <user>
+    <user_id>URDDX224S</user_id>
+    <user_name>masso</user_name>
+  </user>
+  <reply_user_is_in_current>True</reply_user_is_in_current>
+  <talk>
+    <talk_id>0918189e-f736-424d-b3ed-1329cf810bb2</talk_id>
+    <talk_text>ツイート
+&lt;https://twitter.com/monosoi_akarusa/status/1316139571269169155?s=21|https://twitter.com/monosoi_akarusa/status/1316139571269169155?s=21&gt;
+(元記事 &lt;https://toyokeizai.net/articles/amp/333980?page=2|独身か有配偶かで異なる男女の｢人生｣の長さ&gt; | &lt;https://toyokeizai.net/articles/amp/333980?page=2| 東洋経済&gt;)
+と
+グラフ(添付画像)
+
+について、
+なんか違和感あるのですが、同じ意見をお持ちの方いらっしゃいますでしょうか？
+もしいらっしゃいましたら、考え方を教えていただきたいです。
+
+
+個人的に違和感を覚える部分を言語化すると……
+
+```‪①「未婚」vs「既婚(有配偶、死別、離別)」の比較なのに、高確率で未婚であろう15〜19歳のデータ含む‬
+
+‪②未婚、有配偶、離別、死別で平均年齢が違うはず‬
+‪(そもそも早死にする人は未婚である確率が高い。逆に長生きする人は結婚する確率も離別・死別する確率も高い。)‬
+
+‪③割合じゃなくて人数で出すべきでは？‬
+
+‪例えば、グラフより‬
+‪男性・未婚死亡者・65〜69歳≒17%‬
+‪男性・有配偶死亡者・80〜84歳≒22%‬
+‪な訳だが‬
+
+‪仮に、‬
+‪男性・未婚死亡者総数=1万人‬
+‪男性・有配偶死亡者総数=5千人‬
+‪とすると、‬
+
+‪65〜69歳男性・未婚死亡者総数=1700人‬
+‪80〜84歳男性・有配偶死亡者総数=1100人となって、‬
+‪グラフ📈では少なそうに見える方が多くなる。```
+</talk_text>
+    <talk_ts>2020-10-14 16:57:16.023900+00:00</talk_ts>
+  </talk>
+  <thread_ts>2020-10-14 16:57:16.023900+00:00</thread_ts>
+  <target_date>2020-10-16</target_date>
+  <channel>
+    <channel_id>C014BS723RC</channel_id>
+    <channel_name>03-03-質問-その他</channel_name>
+  </channel>
+  <reply_num>1</reply_num>
+  <user>
+    <user_id>UT5FYCM6D</user_id>
+    <user_name>K</user_name>
+  </user>
+  <reply_user_is_in_current>True</reply_user_is_in_current>
+  <talk>
+    <talk_id>129ce769-46e7-414a-b1cd-266fc60c7ba5</talk_id>
+    <talk_text>割り算によって失われる情報、、、</talk_text>
+    <talk_ts>2020-10-15 00:05:14.024600+00:00</talk_ts>
+  </talk>
+  <thread_ts>2020-10-14 16:57:16.023900+00:00</thread_ts>
+  <target_date>2020-10-16</target_date>
+  <channel>
+    <channel_id>C014BS723RC</channel_id>
+    <channel_name>03-03-質問-その他</channel_name>
+  </channel>
+  <reply_num>2</reply_num>
+  <user>
+    <user_id>URDDX224S</user_id>
+    <user_name>masso</user_name>
+  </user>
+  <reply_user_is_in_current>True</reply_user_is_in_current>
+  <talk>
+    <talk_id>1831dcf4-2173-4c0c-b60a-d3afaa66faad</talk_id>
+    <talk_text>タイムリーだ、、 &lt;#CT1S314AG|07-13-輪読会-初級&gt; </talk_text>
+    <talk_ts>2020-10-15 00:07:48.025200+00:00</talk_ts>
+  </talk>
+  <thread_ts>2020-10-14 16:57:16.023900+00:00</thread_ts>
+  <target_date>2020-10-16</target_date>
+  <channel>
+    <channel_id>C014BS723RC</channel_id>
+    <channel_name>03-03-質問-その他</channel_name>
+  </channel>
+  <reply_num>0</reply_num>
+  <user>
+    <user_id>URDDX224S</user_id>
+    <user_name>masso</user_name>
+  </user>
+  <reply_user_is_in_current>True</reply_user_is_in_current>
+  <talk>
+    <talk_id>bb23b4d2-ca0b-4983-b164-193d2583d805</talk_id>
+    <talk_text>&lt;@URDDX224S&gt;さんがチャンネル名を「03-3-質問-その他」から「03-03-質問-その他」に変更しました。</talk_text>
+    <talk_ts>2020-10-16 09:11:01.025400+00:00</talk_ts>
+  </talk>
+  <thread_ts>2020-10-16 09:11:01.025400+00:00</thread_ts>
+  <target_date>2020-10-17</target_date>
+  <channel>
+    <channel_id>CJCNV9LG2</channel_id>
+    <channel_name>03-1-質問</channel_name>
+  </channel>
+  <reply_num>0</reply_num>
+  <user>
+    <user_id>UKU6PP3J5</user_id>
+    <user_name>mory</user_name>
+  </user>
+  <reply_user_is_in_current>False</reply_user_is_in_current>
+  <talk>
+    <talk_id>116c2a96-78cc-4698-bfb6-7e290e797cc6</talk_id>
+    <talk_text>以下のような事例を調べています。
+ML×VRの様な。
+GANやCV系の3Dデータの自動生成系の技術などお詳しい方がいればご教授いただきたいです。
+Nvidia researchとかによくあるのですが。
+&lt;https://www.google.com/url?sa=t&amp;amp;source=web&amp;amp;rct=j&amp;amp;url=https://www.itmedia.co.jp/news/spv/1812/04/news118.html&amp;amp;ved=2ahUKEwiS5baGm5HjAhWoHqYKHeIJDq4QFjAAegQIBRAB&amp;amp;usg=AOvVaw37G-qKqqNvj3VUTJYy1VbN&amp;amp;cshid=1561897895412&gt;</talk_text>
+    <talk_ts>2019-06-30 12:34:22.004200+00:00</talk_ts>
+  </talk>
+  <thread_ts>2019-06-30 12:34:22.004200+00:00</thread_ts>
+  <target_date>2019-07-01</target_date>
+  <channel>
+    <channel_id>CJCNV9LG2</channel_id>
+    <channel_name>03-1-質問</channel_name>
+  </channel>
+  <reply_num>1</reply_num>
+  <user>
+    <user_id>UJRAL005U</user_id>
+    <user_name>村上智之　ｷﾞﾙﾄﾞ代表　筋ﾄﾚで学ぶﾃﾞｰﾀ分析</user_name>
+  </user>
+  <reply_user_is_in_current>True</reply_user_is_in_current>
+  <talk>
+    <talk_id>01f955d6-2a47-45c7-9332-0f0de69a3daf</talk_id>
+    <talk_text>SMFなどは少しやっていたのですが、3D画像生成となると、門外漢ですねー。。。
+
+どういった用途で使うことを想定されてるんですか？？</talk_text>
+    <talk_ts>2019-06-30 12:40:56.006200+00:00</talk_ts>
+  </talk>
+  <thread_ts>2019-06-30 12:34:22.004200+00:00</thread_ts>
+  <target_date>2019-07-01</target_date>
+  <channel>
+    <channel_id>CJCNV9LG2</channel_id>
+    <channel_name>03-1-質問</channel_name>
+  </channel>
+  <reply_num>2</reply_num>
+  <user>
+    <user_id>UJRAL005U</user_id>
+    <user_name>村上智之　ｷﾞﾙﾄﾞ代表　筋ﾄﾚで学ぶﾃﾞｰﾀ分析</user_name>
+  </user>
+  <reply_user_is_in_current>True</reply_user_is_in_current>
+  <talk>
+    <talk_id>13e7dc3a-6bb2-4592-abc6-6496decc8653</talk_id>
+    <talk_text>&lt;http://createwith.ai/paper/20170625/831&gt;</talk_text>
+    <talk_ts>2019-06-30 12:45:45.006600+00:00</talk_ts>
+  </talk>
+  <thread_ts>2019-06-30 12:34:22.004200+00:00</thread_ts>
+  <target_date>2019-07-01</target_date>
+  <channel>
+    <channel_id>CJCNV9LG2</channel_id>
+    <channel_name>03-1-質問</channel_name>
+  </channel>
+  <reply_num>3</reply_num>
+  <user>
+    <user_id>UJRAL005U</user_id>
+    <user_name>村上智之　ｷﾞﾙﾄﾞ代表　筋ﾄﾚで学ぶﾃﾞｰﾀ分析</user_name>
+  </user>
+  <reply_user_is_in_current>True</reply_user_is_in_current>
+  <talk>
+    <talk_id>fa2b3e0c-68ef-4cc4-b0cc-5950e8790ec2</talk_id>
+    <talk_text>ここら辺の領域でしょうか？？</talk_text>
+    <talk_ts>2019-06-30 12:45:53.007100+00:00</talk_ts>
+  </talk>
+  <thread_ts>2019-06-30 12:34:22.004200+00:00</thread_ts>
+  <target_date>2019-07-01</target_date>
+</root>
