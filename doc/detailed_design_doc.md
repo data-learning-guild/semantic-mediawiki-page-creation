@@ -50,12 +50,14 @@
     1. df_tmp = df_talk[df.thread_ts == t] **# thread_tsを取得**
     1. c = *df_to_container(df_tmp, i)* **# dfのデータをPageDataContainerへ変換**
     1. containers_list.append(c)
-1. for i in range(0, len(thread_ts_list), num_of_pages_ix_xml) **# num_of_pagesごとに、index数値を取得
-    1. tmp_container_list = containers_listから1xmlファイル分のPageDataContainerを取得
+1. for i in range(0, len(thread_ts_list), num_of_pages_ix_xml) **# num_of_pagesごとに、index数値を取得**
+    1. tmp_container_list = 1xmlファイル分のPageDataContainer
     1. dict_tmp = *container_to_dict(tmp_container_list, output_template, user_master, annotation_master)* **# PageDataContainerを辞書型へ変換**
     1. output_dict_list.append(dict_tmp) **# 作成した辞書をグローバル変数へ格納**
 1. for d in output_dict_list: **# 格納しておいたアウトプット辞書を１つずつ取り出し**
     1. *dict_to_xml(d)* **# 辞書をxmlへ出力**
+
+---
 
 ### setupメソッド
 #### 処理
@@ -65,6 +67,7 @@
 1. annotation_master = create_annotation_master(pd.read_csv) **アノテーション変換用dictの作成**
 1. output_template = read_xml　**# xmlテンプレ読み込み（辞書型）**
 
+---
 
 ### create_user_masterメソッド
 #### 引数
@@ -76,6 +79,8 @@
 ### 処理
 省略
 
+---
+
 ### create_annotetion_dictメソッド
 #### 引数
 - 単語マスタのdf
@@ -85,6 +90,8 @@
   - Value: プロパティ名
 ### 処理
 省略
+
+---
 
 ### df_to_containerメソッド
 #### 引数
@@ -96,6 +103,8 @@
 - PageDataContainerClassオブジェクトの初期化
 - df内の各データを該当するメンバに割当
 - 必要に応じてクラスメソッドへ処理を切り分け
+
+---
 
 ### container_to_dictメソッド
 #### 引数
@@ -116,12 +125,16 @@
         - アノテーション
 - Key名について、要調査事項を参照
 
+---
+
 ### dict_to_xmlメソッド
 #### 引数
 - xml出力用dict
 #### 処理
 - dictオブジェクトをxml形式のテキストに変換
 - テキストファイルの出力
+
+---
 
 ## 要調査事項
 - dict -> xmlとする場合、並列する同一タグをどう扱うのか？
