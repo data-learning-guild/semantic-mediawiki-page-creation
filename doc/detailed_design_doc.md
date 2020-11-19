@@ -22,6 +22,12 @@
 
 ## グローバル変数
 1. 各種ファイル名
+1. user_master
+    - メンション変換用dict
+1. annotation_master
+    - メンション変換用dict
+1. output_template
+    - 出力xmlのテンプレート
 1. containers_list
     - PageDataContainerを格納するリスト
 1. output_dict_list
@@ -38,9 +44,6 @@
 
 #### 処理
 1. df_talk = pd.read_csv **# csvデータ読み込み**
-2. user_dict = create_user_dict(pd.read_csv) **メンション変換用dictの作成**
-2. annotation_dict = create_annotation_dict(pd.read_csv) **アノテーション変換用dictの作成**
-2. tmplate = read_xml　**# xmlテンプレ読み込み（辞書型）**
 2. thread_ts_list = pd.unique(thread_ts).tolist() **# thread_tsの一覧取得**
 3. for i, t in enumerate(thread_ts_list): **# thread_ts種類ごとにfor loop**
     1. df_tmp = df_talk[df.thread_ts == t] **# thread_tsを取得**
@@ -48,12 +51,21 @@
     1. containers_list.append(c)
 4. for i in range(0, len(thread_ts_list), num_of_pages_ix_xml) **# num_of_pagesごとに、index数値を取得
     1. tmp_container_list = containers_listから1xmlファイル分のPageDataContainerを取得
-    1. dict_tmp = *container_to_dict(tmp_container_list, template, user_dict, annotation_dict)* **# PageDataContainerを辞書型へ変換**
+    1. dict_tmp = *container_to_dict(tmp_container_list, output_template, user_master, annotation_master)* **# PageDataContainerを辞書型へ変換**
     1. output_dict_list.append(dict_tmp) **# 作成した辞書をグローバル変数へ格納**
 5. for d in output_dict_list: **# 格納しておいたアウトプット辞書を１つずつ取り出し**
     1. *dict_to_xml(d)* **# 辞書をxmlへ出力**
 
-### create_user_dictメソッド
+### setupメソッド
+#### 処理
+- 各種マスタデータの読み込み・格納
+
+1. user_master = create_user_master(pd.read_csv) **メンション変換用dictの作成**
+1. annotation_master = create_annotation_master(pd.read_csv) **アノテーション変換用dictの作成**
+1. output_template = read_xml　**# xmlテンプレ読み込み（辞書型）**
+
+
+### create_user_masterメソッド
 #### 引数
 - ユーザマスタのdf
 ### 返り値
