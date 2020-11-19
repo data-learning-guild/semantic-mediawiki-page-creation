@@ -44,16 +44,17 @@
 
 #### 処理
 1. df_talk = pd.read_csv **# csvデータ読み込み**
-2. thread_ts_list = pd.unique(thread_ts).tolist() **# thread_tsの一覧取得**
-3. for i, t in enumerate(thread_ts_list): **# thread_ts種類ごとにfor loop**
+1. setupメソッド **# 各種マスタの設定**
+1. thread_ts_list = pd.unique(thread_ts).tolist() **# thread_tsの一覧取得**
+1. for i, t in enumerate(thread_ts_list): **# thread_ts種類ごとにfor loop**
     1. df_tmp = df_talk[df.thread_ts == t] **# thread_tsを取得**
     1. c = *df_to_container(df_tmp, i)* **# dfのデータをPageDataContainerへ変換**
     1. containers_list.append(c)
-4. for i in range(0, len(thread_ts_list), num_of_pages_ix_xml) **# num_of_pagesごとに、index数値を取得
+1. for i in range(0, len(thread_ts_list), num_of_pages_ix_xml) **# num_of_pagesごとに、index数値を取得
     1. tmp_container_list = containers_listから1xmlファイル分のPageDataContainerを取得
     1. dict_tmp = *container_to_dict(tmp_container_list, output_template, user_master, annotation_master)* **# PageDataContainerを辞書型へ変換**
     1. output_dict_list.append(dict_tmp) **# 作成した辞書をグローバル変数へ格納**
-5. for d in output_dict_list: **# 格納しておいたアウトプット辞書を１つずつ取り出し**
+1. for d in output_dict_list: **# 格納しておいたアウトプット辞書を１つずつ取り出し**
     1. *dict_to_xml(d)* **# 辞書をxmlへ出力**
 
 ### setupメソッド
