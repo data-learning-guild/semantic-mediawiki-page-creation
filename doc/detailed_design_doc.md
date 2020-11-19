@@ -21,7 +21,12 @@
 
 ## グローバル変数
 1. 各種ファイル名
-2. output_dict_list
+1. containers_list
+    - PageDataContainerを格納するリスト
+1. output_dict_list
+    - 出力dictを格納するリスト
+1. num_of_pages_in_xml
+    - 1xmlファイルあたりのページ数
 
 ## 処理フロー
 ### メイン関数
@@ -37,9 +42,12 @@
 3. for i, t in enumerate(thread_ts_list): **# thread_ts種類ごとにfor loop**
     1. df_tmp = df[df.thread_ts == t] **# thread_tsを取得**
     1. c = *df_to_container(df_tmp, i)* **# dfのデータをPageDataContainerへ変換**
-    1. dict_tmp = *container_to_dict(c, template)* **# PageDataContainerを辞書型へ変換**
+    1. containers_list.append(c)
+4. for i in range(0, len(thread_ts_list), num_of_pages_ix_xml) **# num_of_pagesごとに、index数値を取得
+    1. tmp_container_list = containers_listから1xmlファイル分のPageDataContainerを取得
+    1. dict_tmp = *container_to_dict(tmp_container_list, template)* **# PageDataContainerを辞書型へ変換**
     1. output_dict_list.append(dict_tmp) **# 作成した辞書をグローバル変数へ格納**
-4. for d in output_dict_list: **# 格納しておいたアウトプット辞書を１つずつ取り出し**
+5. for d in output_dict_list: **# 格納しておいたアウトプット辞書を１つずつ取り出し**
     1. *dict_to_xml(d)* **# 辞書をxmlへ出力**
 
 ### df_to_containerメソッド
@@ -55,7 +63,7 @@
 
 ### container_to_dictメソッド
 #### 引数
-- 1スレッド分のPageDataContainerClass
+- 1xmlファイル分のPageDataContainerClass
 - テンプレートxmlのdict
 #### 返り値
 - 1スレッド分の出力dict
