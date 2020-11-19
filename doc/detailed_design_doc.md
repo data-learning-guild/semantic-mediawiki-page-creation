@@ -118,8 +118,8 @@
 - PageDataContainerClassオブジェクトをもとに出力xmlのもととなるdictの作成
 - テンプレートdictをコピー
 - xmlに必要なテキストデータの整形→dictへ格納
-    - <title> : titleメンバ
-    - <text>
+    - `<title>` : titleメンバ
+    - `<text>`
         - Infoboxの記述
         - メンションのuser_id変換
         - アノテーション
