@@ -29,12 +29,12 @@
 2. tmplate = read_xml　# xmlテンプレ読み込み（辞書型）
 2. thread_ts_list = pd.unique(thread_ts).tolist() # thread_tsの一覧取得
 3. for i, t in enumerate(thread_ts_list): # thread_ts種類ごとにfor loop
-  1. df_tmp = df[df.thread_ts == t] # thread_tsを取得
-  1. c = df_to_container(df_tmp) # dfのデータをPageDataContainerへ変換
-  1. dict_tmp = container_to_dict(c, template) # PageDataContainerを辞書型へ変換
-  1. output_dict_list.append(dict_tmp) # 作成した辞書をグローバル変数へ格納
+    1. df_tmp = df[df.thread_ts == t] # thread_tsを取得
+    1. c = df_to_container(df_tmp) # dfのデータをPageDataContainerへ変換
+    1. dict_tmp = container_to_dict(c, template) # PageDataContainerを辞書型へ変換
+    1. output_dict_list.append(dict_tmp) # 作成した辞書をグローバル変数へ格納
 4. for d in output_dict_list: # 格納しておいたアウトプット辞書を１つずつ取り出し
-  1. dict_to_xml(d) # 辞書をxmlへ出力
+    1. dict_to_xml(d) # 辞書をxmlへ出力
 
 ## 要調査事項
 - dict -> xmlとする場合、並列する同一タグをどう扱うのか？
