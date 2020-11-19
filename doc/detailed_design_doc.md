@@ -18,6 +18,7 @@
 |answer_contents|tuple|回答本文|
 
 #### メソッド
+- 下記、処理フローを参考に必要に応じて追加
 
 ## グローバル変数
 1. 各種ファイル名
@@ -36,19 +37,41 @@
 3. 出力先xmlフォルダパス
 
 #### 処理
-1. df = pd.read_csv **# csvデータ読み込み**
+1. df_talk = pd.read_csv **# csvデータ読み込み**
+2. user_dict = create_user_dict(pd.read_csv) **メンション変換用dictの作成**
+2. annotation_dict = create_annotation_dict(pd.read_csv) **アノテーション変換用dictの作成**
 2. tmplate = read_xml　**# xmlテンプレ読み込み（辞書型）**
 2. thread_ts_list = pd.unique(thread_ts).tolist() **# thread_tsの一覧取得**
 3. for i, t in enumerate(thread_ts_list): **# thread_ts種類ごとにfor loop**
-    1. df_tmp = df[df.thread_ts == t] **# thread_tsを取得**
+    1. df_tmp = df_talk[df.thread_ts == t] **# thread_tsを取得**
     1. c = *df_to_container(df_tmp, i)* **# dfのデータをPageDataContainerへ変換**
     1. containers_list.append(c)
 4. for i in range(0, len(thread_ts_list), num_of_pages_ix_xml) **# num_of_pagesごとに、index数値を取得
     1. tmp_container_list = containers_listから1xmlファイル分のPageDataContainerを取得
-    1. dict_tmp = *container_to_dict(tmp_container_list, template)* **# PageDataContainerを辞書型へ変換**
+    1. dict_tmp = *container_to_dict(tmp_container_list, template, user_dict, annotation_dict)* **# PageDataContainerを辞書型へ変換**
     1. output_dict_list.append(dict_tmp) **# 作成した辞書をグローバル変数へ格納**
 5. for d in output_dict_list: **# 格納しておいたアウトプット辞書を１つずつ取り出し**
     1. *dict_to_xml(d)* **# 辞書をxmlへ出力**
+
+### create_user_dictメソッド
+#### 引数
+- ユーザマスタのdf
+### 返り値
+- メンション変換用dict
+  - Key: (user_id, target_date) **# 日付ごとにユーザ表示名が変わるため、user_id+target_dateをキーとする**
+  - Value: name
+### 処理
+省略
+
+### create_annotetion_dictメソッド
+#### 引数
+- 単語マスタのdf
+### 返り値
+- アノテーション変換用dict
+  - Key: アノテーショントリガーの単語
+  - Value: プロパティ名
+### 処理
+省略
 
 ### df_to_containerメソッド
 #### 引数
@@ -65,12 +88,19 @@
 #### 引数
 - 1xmlファイル分のPageDataContainerClass
 - テンプレートxmlのdict
+- メンション変換用dict
+- アノテーション用dict
 #### 返り値
 - 1スレッド分の出力dict
 #### 処理
 - PageDataContainerClassオブジェクトをもとに出力xmlのもととなるdictの作成
 - テンプレートdictをコピー
 - xmlに必要なテキストデータの整形→dictへ格納
+    - <title> : titleメンバ
+    - <text>
+        - Infoboxの記述
+        - メンションのuser_id変換
+        - アノテーション
 - Key名について、要調査事項を参照
 
 ### dict_to_xmlメソッド
@@ -90,3 +120,4 @@
 ## 検討項目
 - df -> ContainerClass -> dict を1つのfor loopでやらずとも、それぞれでfor loopを回しても良い
   - その方が、中間データのContainerClassをグローバル変数として保持できる
+- 初期化等は初期化メソッドにまとめても良さそう
