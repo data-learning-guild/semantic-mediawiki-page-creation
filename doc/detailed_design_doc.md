@@ -127,6 +127,12 @@
         - アノテーション
 - Key名について、要調査事項を参照
 
+#### 出力xmlフォーマットイメージ
+- 下記イメージの`<mediawiki></mediawiki>`全体を出力
+
+![xml-image-top](detailed_design_doc/99761803-59d28b00-2b3a-11eb-9973-4c5a5e44626a.png)
+![xml-image-bottom](detailed_design_doc/99761924-ab7b1580-2b3a-11eb-98a8-56d809a1c89b.png)
+
 ---
 
 ### dict_to_xmlメソッド
@@ -144,8 +150,11 @@
   - しかし、辞書型を使うと'page'キーは１つしか使えない
   - 対処方法を検討する必要あり
     - 仮に['page1'], ['page2']とおいておいて、テキスト出力後に修正…？
+  - [valueにリストを使う方法](https://www.haya-programming.com/entry/2018/04/24/002524)
+    - シリアライザが対応しているかは要調査
 
 ## 検討項目
 - df -> ContainerClass -> dict を1つのfor loopでやらずとも、それぞれでfor loopを回しても良い
   - その方が、中間データのContainerClassをグローバル変数として保持できる
 - 初期化等は初期化メソッドにまとめても良さそう
+- 慣れてくると内包表記にもチャレンジできる！ｗ
