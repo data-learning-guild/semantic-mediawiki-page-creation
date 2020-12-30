@@ -57,7 +57,7 @@ class PageDataContainer:
             self.question_members = tuple(
                 user for user in df_thread[df_thread.reply_num == 0].user_name)
             self.answer_members = tuple(user for user in df_thread.user_name.unique()
-                                        if user != df_thread[df_thread.reply_num == 0].user_name[0])
+                                        if user != df_thread[df_thread.reply_num == 0].user_name.tolist()[0])
         # 会話の中から単語リストに該当する単語のタプル。出現順位順
         cnt_dict = {word: " ".join(df_thread.talk_text.to_list()).count(
             word) for word in anotation_master.values()}
