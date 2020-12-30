@@ -173,10 +173,10 @@ def main(input_csv_filepath, user_master_filepath, anotation_master_filepath, ou
 
 
 if __name__ == '__main__':
-    input_csv_filepath = r'workdir/csv/question_talk_data.csv'
-    user_master_filepath = r'workdir/csv/user_name_master.csv'
-    anotation_master_filepath = r'workdir/csv/annotation_master.csv'
-    output_template_filepath = r'workdir/template/import-template.xml'
-    output_folderpath = r'workdir/xml/'
+    input_csv_filepath = r'../csv/question_talk_data.csv'
+    user_master_filepath = r'../csv/user_name_master.csv'
+    anotation_master_filepath = r'../csv/annotation_master.csv'
+    output_template_filepath = r'../template/import-template.xml'
+    output_folderpath = r'../xml/'
     main(input_csv_filepath, user_master_filepath,
          anotation_master_filepath, output_template_filepath, output_folderpath)
