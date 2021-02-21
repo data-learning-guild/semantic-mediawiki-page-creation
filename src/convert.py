@@ -76,7 +76,7 @@ class PageDataContainer:
     def to_dict(self, output_template):
         container_dict = output_template
 
-        text = f'{{Infobox Q&A\n\
+        text = f'{{{{Infobox Q&A\n\
 | question_channel = ﻿[[チャンネル一覧##{unescape(self.question_channel)}|{unescape(self.question_channel)}]] <!-- チャンネル名 -->\n\
 | question_date = {self.question_date} <!-- 質問投稿日 -->\n\
 | question_member_1 = [[利用者:{unescape(self.question_members[0])}]] <!-- 質問者 -->\n'
@@ -87,7 +87,7 @@ class PageDataContainer:
         for i in range(min(len(self.tech_topics), 5)):
             text += f'tech_topic_{i+1} = [[質問トピック::{unescape(self.tech_topics[i])}]]\n'
 
-        text += f'}}\n\
+        text += f'}}}}\n\
 \n\
 ==質問==\n\
 <blockquote>\n'
