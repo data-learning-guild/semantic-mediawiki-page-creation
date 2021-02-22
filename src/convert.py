@@ -16,9 +16,9 @@ class PageDataContainer:
         # 投稿本文のusername を置換するための関数
         def replace_username(text, user_master) -> 'replaced_text':
             pattern = r'(?<=<@)(.+?)(?=>)'
-            usercode_set = set(re.findall(pattern, text))
+            usercodes = re.findall(pattern, text)
 
-            for usercode in usercode_set:
+            for usercode in usercodes:
                 date_list = []
                 for key in user_master:
                     if usercode in key:
@@ -39,12 +39,12 @@ class PageDataContainer:
         # ページタイトルに使用するindex
         self.id = i
         # title_idxから"Q&A-xxxx"を設定
-        self.title = f'Q&A-{i:04d}'
+        self.title = f'Q&A-{i:06d}'
         # 質問したチャンネル名
         self.question_channel = df_thread['channel_name'][0]
         # 質問した日付
-        question_datetime = dt.datetime.strptime(
-            df_thread['thread_ts'][0][:10], '%Y-%m-%d')
+        question_datetime = df_thread['thread_ts'].min()
+        # dt.datetime.strptime(df_thread['thread_ts'][0][:10], '%Y-%m-%d')
         self.question_date = dt.date(
             question_datetime.year, question_datetime.month, question_datetime.day)
         # 質問したメンバーの表示名のタプル
