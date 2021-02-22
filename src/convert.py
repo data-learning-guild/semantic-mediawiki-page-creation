@@ -32,7 +32,7 @@ class PageDataContainer:
                 for date in date_list:
                     if date < self.question_date:
                         text = text.replace(
-                            f'<@{usercode}>', user_master[(usercode, date.strftime('%Y-%m-%d'))])
+                            f'<@{usercode}>', f'@```{user_master[(usercode, date.strftime("%Y-%m-%d"))]}``` ')
                         break
             return text
 
