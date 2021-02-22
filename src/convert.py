@@ -51,16 +51,14 @@ class PageDataContainer:
         # 回答したメンバーの表示名のタプル
 
         question_talk = df_thread.iloc[0]
-        self.question_members = question_talk['user_name']
+        self.question_member = question_talk['user_name']
         if len(df_thread) < 2:
             self.answer_members = []
         elif len(df_thread) == 2:
             self.answer_members = [df_thread.iloc[1:]['user_name']]
         else:
             self.answer_members = df_thread.iloc[1:]['user_name'].tolist()
-
-
-'''
+        '''
         if len(df_thread[df_thread.reply_num == 0]) == 0:
             self.question_members = '',
             self.answer_members = tuple(
@@ -70,7 +68,7 @@ class PageDataContainer:
                 user for user in df_thread[df_thread.reply_num == 0].user_name)
             self.answer_members = tuple(user for user in df_thread.user_name.unique()
                                         if user != df_thread[df_thread.reply_num == 0].user_name.tolist()[0])
-'''
+        '''
         # 会話の中から単語リストに該当する単語のタプル。出現順位順
         cnt_dict = {word: " ".join(df_thread.talk_text.to_list()).count(
             word) for word in anotation_master.values()}
@@ -94,7 +92,9 @@ class PageDataContainer:
 | question_date = {self.question_date} <!-- 質問投稿日 -->\n\
 | question_member_1 = [[利用者:{unescape(self.question_members[0])}]] <!-- 質問者 -->\n'
 
-        for i, answer_member in enumerate(self.answer_members):
+        unique_answer_members = set(
+            self.answer_members) - {self.question_member}
+        for i, answer_member in enumerate(unique_answer_members):
             text += f'| answer_member_{i+1} = [[利用者:{unescape(answer_member)}]]\n'
 
         for i in range(min(len(self.tech_topics), 5)):
