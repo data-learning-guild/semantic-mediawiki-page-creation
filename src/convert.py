@@ -99,7 +99,8 @@ class PageDataContainer:
 \n\
 ==回答==\n'
 
-        for answer_contains in self.answer_contains:
+        for i, answer_contains in enumerate(self.answer_contains):
+            text += f'===回答{i}:XXXさん==='
             text += f'{unescape(answer_contains)}\n'
 
         text += f'<!-- 回答テキスト -->\n\n[[カテゴリ:Q&Aまとめ]]'
@@ -144,7 +145,8 @@ def dict_to_xml(i, container_dict, output_folderpath):
 
 
 def main(input_csv_filepath, user_master_filepath, anotation_master_filepath, output_template_filepath, output_folderpath):
-    df_talks = pd.read_csv(input_csv_filepath)
+    df_talks = pd.read_csv(input_csv_filepath, parse_dates=[
+                           'talk_ts', 'thread_ts', 'target_date'])
 
     # user_master, anotation_master, xml_template をdict型で読み込み
     user_master, anotation_master, output_template = setup(
@@ -155,7 +157,7 @@ def main(input_csv_filepath, user_master_filepath, anotation_master_filepath, ou
     num_of_pages_in_xml = 1  # 1xmlファイルあたりのページ数 どう使うかよくわからない
 
     # スレッドごとにコンテナクラスのオブジェクトにする
-    thread_ts_list = df_talks['thread_ts'].unique().tolist()
+    thread_ts_list = df_talks['thread_ts'].unique()
     for i, ts in enumerate(thread_ts_list):
         df_thread = df_talks[df_talks['thread_ts'] == ts].reset_index()
         container = df_to_container(
