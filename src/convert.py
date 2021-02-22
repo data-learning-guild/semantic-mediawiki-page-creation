@@ -49,6 +49,18 @@ class PageDataContainer:
             question_datetime.year, question_datetime.month, question_datetime.day)
         # 質問したメンバーの表示名のタプル
         # 回答したメンバーの表示名のタプル
+
+        question_talk = df_thread.iloc[0]
+        self.question_members = question_talk['user_name']
+        if len(df_thread) < 2:
+            self.answer_members = []
+        elif len(df_thread) == 2:
+            self.answer_members = [df_thread.iloc[1:]['user_name']]
+        else:
+            self.answer_members = df_thread.iloc[1:]['user_name'].tolist()
+
+
+'''
         if len(df_thread[df_thread.reply_num == 0]) == 0:
             self.question_members = '',
             self.answer_members = tuple(
@@ -58,6 +70,7 @@ class PageDataContainer:
                 user for user in df_thread[df_thread.reply_num == 0].user_name)
             self.answer_members = tuple(user for user in df_thread.user_name.unique()
                                         if user != df_thread[df_thread.reply_num == 0].user_name.tolist()[0])
+'''
         # 会話の中から単語リストに該当する単語のタプル。出現順位順
         cnt_dict = {word: " ".join(df_thread.talk_text.to_list()).count(
             word) for word in anotation_master.values()}
@@ -159,7 +172,8 @@ def main(input_csv_filepath, user_master_filepath, anotation_master_filepath, ou
     # スレッドごとにコンテナクラスのオブジェクトにする
     thread_ts_list = df_talks['thread_ts'].unique()
     for i, ts in enumerate(thread_ts_list):
-        df_thread = df_talks[df_talks['thread_ts'] == ts].reset_index()
+        df_thread = df_talks[df_talks['thread_ts'] == ts]\
+            .sort_values(by='talk_ts').reset_index()
         container = df_to_container(
             i, df_thread, user_master, anotation_master)
         container_list.append(container)
