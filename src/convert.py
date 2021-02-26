@@ -21,8 +21,6 @@ class PageDataContainer:
 
         # ページタイトルに使用するindex
         self.id = i
-        # title_idxから"Q&A-xxxx"を設定
-        self.title = f'Q&A-{i:06d}'
         # 質問したチャンネル名
         self.question_channel = df_thread['channel_name'][0]
         # 質問した日付
@@ -44,6 +42,9 @@ class PageDataContainer:
 
         self.tech_topics = self.annotate_topics(
             df_thread['talk_text'].tolist(), topic_detector)
+
+        # title_idxから"Q&A-xxxx"を設定
+        self.title = f'Q&A-{i:06d}:' + '-'.join(self.tech_topics)
 
         df_thread['talk_text_rpls'] = df_thread.apply(
             lambda r: replace_username(r.talk_text, user_master.get(r.target_date)), axis=1)
@@ -82,20 +83,26 @@ class PageDataContainer:
         text += '}}'
         text += '\n\n'
         text += '==質問==\n'
+        text += f'===質問者: {unescape(self.question_member)}さん===\n'
+
         text += '<blockquote>\n'
-
         text += f'{unescape(self.question_contents)}\n'
-
         text += '<!-- 質問テキスト -->\n'
         text += '</blockquote>\n'
         text += '\n'
+
         text += '==回答==\n'
 
         if len(self.answer_members) != len(self.answer_contents):
             raise('Answer members & contents are different')
 
-        for i, (answer_member, content) in enumerate(zip(self.answer_members, self.answer_contents)):
-            text += f'===回答{i+1}:{unescape(answer_member)}さん===\n'
+        latest_user = ''
+        answer_idx = 1
+        for answer_member, content in zip(self.answer_members, self.answer_contents):
+            if latest_user != answer_member:  # Combine the same user names
+                text += f'===回答{answer_idx}: {unescape(answer_member)}さん===\n'
+                latest_user = answer_member
+                answer_idx += 1
             text += f'{unescape(content)}\n\n'
 
         text += '<!-- 回答テキスト -->\n\n'
@@ -104,8 +111,19 @@ class PageDataContainer:
 
     def to_dict(self, output_template):
         container_dict = output_template
-        container_dict['mediawiki']['page']['title'] = self.title
-        container_dict['mediawiki']['page']['revision']['text']['#text'] = self.generate_xml_text()
+
+        pg1 = copy.deepcopy(output_template['mediawiki']['page'])
+        pg1['id'] = self.id
+        pg1['title'] = self.title
+        pg1['revision']['text']['#text'] = self.generate_xml_text()
+
+        pg2 = copy.deepcopy(output_template['mediawiki']['page'])
+
+        container_dict['mediawiki']['page'] = [pg1, pg2]
+
+        # container_dict['mediawiki']['page']['id'] = self.id
+        # container_dict['mediawiki']['page']['title'] = self.title
+        # container_dict['mediawiki']['page']['revision']['text']['#text'] = self.generate_xml_text()
 
         return container_dict
 
