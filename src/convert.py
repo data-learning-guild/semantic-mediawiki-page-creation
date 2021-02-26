@@ -40,7 +40,8 @@ class PageDataContainer:
         else:
             self.answer_members = df_thread.loc[1:]['user_name'].tolist()
 
-        self.tech_topics = annotate_topics(topic_detector)
+        self.tech_topics = self.annotate_topics(
+            df_thread['talk_text'].tolist(), topic_detector)
 
         df_thread['talk_text_rpls'] = df_thread.apply(
             lambda r: replace_username(r.talk_text, user_master.get(r.target_date)), axis=1)
@@ -49,6 +50,17 @@ class PageDataContainer:
         self.question_contents = df_thread.loc[0, 'talk_text_rpls']
         # 回答本文
         self.answer_contents = df_thread.loc[1:, 'talk_text_rpls'].tolist()
+
+    def annotate_topics(self, text_list, topic_detector):
+        all_text = '\n'.join(text_list)
+        retxt = topic_detector.replace_inconsistencies(
+            all_text, topic_detector.str_replace_dict)
+        retxt = topic_detector.delete_symbols(all_text)
+
+        doc = topic_detector.detect(retxt)
+        df_result = topic_detector.get_result(doc)
+
+        return []
 
     def generate_xml_text(self):
         text = '{{Infobox Q&A\n'
@@ -101,8 +113,8 @@ class TopicDetector:
         # set dicts
         self.str_replace_dict = dict(
             zip(df_annotation_master.keyword, df_annotation_master.property))
-        self.topic_dict = [{"label": "Tech", "pattern": x}
-                           for x in df_annotation_master.property.unique()]
+        topic_dict = [{"label": "Tech", "pattern": x}
+                      for x in df_annotation_master.property.unique()]
 
         # nlp model
         self.nlp = spacy.load('ja_ginza')
@@ -110,23 +122,23 @@ class TopicDetector:
         self.ruler.add_patterns(topic_dict)
         self.nlp.add_pipe(self.ruler)
 
-    def replace_inconsistencies(text, replace_dict):
+    def replace_inconsistencies(self, text, replace_dict):
         regex = re.compile('|'.join(map(re.escape, replace_dict)))
         return regex.sub(lambda match: replace_dict[match.group(0)], text)
 
     def delete_symbols(self, text):
-            # sub 'url link'
-            retxt = re.sub(r'<http.+?>', '', text)
-            # sub 'mention'
-            retxt = re.sub(r'<@\w+?>', '', retxt)
-            # sub 'reaction'
-            retxt = re.sub(r':\S+?:', '', retxt)
-            # sub 'mention'
-            retxt = re.sub(r'<#\S+?>', '', retxt)
-            # sub 'html key words'
-            retxt = re.sub(r'(&).+?\w(;)', '', retxt)
-            # sub spaces
-            retxt = re.sub(r'\s', '', retxt)
+        # sub 'url link'
+        retxt = re.sub(r'<http.+?>', '', text)
+        # sub 'mention'
+        retxt = re.sub(r'<@\w+?>', '', retxt)
+        # sub 'reaction'
+        retxt = re.sub(r':\S+?:', '', retxt)
+        # sub 'mention'
+        retxt = re.sub(r'<#\S+?>', '', retxt)
+        # sub 'html key words'
+        retxt = re.sub(r'(&).+?\w(;)', '', retxt)
+        # sub spaces
+        retxt = re.sub(r'\s', '', retxt)
         return retxt
 
     def detect(self, text):
@@ -135,16 +147,13 @@ class TopicDetector:
         doc = self.nlp(text)
         return doc
 
-
     def get_result(self, doc):
-        result_list = []
-        for sent in doc.sents:
-            result_list = result_list + [[str(token.i), token.text, token.lemma_, token.pos_, token.tag_] for token in sent]
-        df_result = pd.DataFrame(result_list, columns = ['token_no', 'text' ,'lemma', 'pos', 'tag'])
-        df_result[(df_result.pos == 'NOUN')|(df_result.pos == 'PROPN')] # select only Noun & Pronpn
-        return df_result
+        return pd.DataFrame([[ent.text, ent.label_, str(ent.start_char), str(ent.end_char)] for ent in doc.ents],
+                            columns=['text', 'label', 'start_pos', 'end_pos'])
 
 # 投稿本文のusername を置換するための関数
+
+
 def replace_username(text, user_master) -> 'replaced_text':
     pattern = r'(?<=<@)(.+?)(?=>)'
     usercodes = re.findall(pattern, text)
@@ -226,6 +235,7 @@ if __name__ == '__main__':
     input_csv_filepath = r'../csv/question_talk_data.csv'
     user_master_filepath = r'../csv/user_name_master.csv'
     anotation_master_filepath = r'../csv/annotation_master.csv'
+
     output_template_filepath = r'../template/import-template.xml'
     output_folderpath = r'../xml/'
     main(input_csv_filepath, user_master_filepath,
