@@ -80,7 +80,7 @@ class PageDataContainer:
 
         doc = topic_detector.detect(retxt)
         df_env_result = topic_detector.get_ent_result(doc)
-        #df_token_result = topic_detector.get_token_result(doc)
+        df_token_result = topic_detector.get_token_result(doc)
         return df_env_result.text.value_counts().index.tolist()
 
     def generate_xml_text(self):
@@ -186,7 +186,7 @@ class TopicDetector:
         # sub 'html key words'
         retxt = re.sub(r'(&).+?\w(;)', '', retxt)
         # sub spaces
-        retxt = re.sub(r'\s', '', retxt)
+        #retxt = re.sub(r'\s', '', retxt)
         return retxt
 
     def detect(self, text):
@@ -211,6 +211,9 @@ class TopicDetector:
         df_result = pd.DataFrame(result_list, columns=[
                                  'token_no', 'text', 'lemma', ',pos', 'tag'])
         return df_result
+
+    def get_annotation_value(self, key_str):
+        return self.__str_annotation_dict.get(key_str)
 
 # 投稿本文のusername を置換するための関数
 
@@ -301,7 +304,6 @@ def main(input_csv_filepath, user_master_filepath, annotation_master_filepath, o
     # dictをxmlとして書き出す。
     for i, container_dict in enumerate(output_dict_list):
         dict_to_xml(i, container_dict, output_folderpath)
-        break
 
 
 if __name__ == '__main__':
