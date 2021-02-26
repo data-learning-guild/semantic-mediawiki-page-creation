@@ -43,16 +43,13 @@ class PageDataContainer:
         self.tech_topics = tuple(word_tuple[0] for word_tuple in sorted({k: v for k, v in cnt_dict.items()
                                                                          if v != 0}.items(), key=lambda x: x[1], reverse=True))
 
-        df_thread['date_user'] = user_master['target_date'].max()
-        df_thread['talk_text_rpls'] = user_master.apply(
-            lambda r: replace_username(r.talk_text, user_master))
+        df_thread['talk_text_rpls'] = df_thread.apply(
+            lambda r: replace_username(r.talk_text, user_master.get(r.target_date)), axis=1)
 
         # 質問本文
-        self.question_contains = tuple(replace_username(
-            text, user_master) for text in df_thread[df_thread.reply_num == 0].talk_text)
+        self.question_contains = df_thread.loc[0, 'talk_text_rpls']
         # 回答本文
-        self.answer_contains = tuple(replace_username(
-            text, user_master) for text in df_thread[df_thread.reply_num != 0].talk_text)
+        self.answer_contains = df_thread.loc[1:, 'talk_text_rpls'].tolist()
         # テンプレート読み込み
         # with open(r'../template/import-template.xml', encoding='utf-8') as xml:
         #    self.dict = xmltodict.parse(xml.read())
@@ -104,24 +101,7 @@ def replace_username(text, user_master) -> 'replaced_text':
     usercodes = re.findall(pattern, text)
 
     for usercode in usercodes:
-        print('a')
-        '''
-        date_list = []
-        for key in user_master:
-            if usercode in key:
-                username_datetime = dt.datetime.strptime(
-                    key[1], '%Y-%m-%d')
-                username_date = dt.date(
-                    username_datetime.year, username_datetime.month, username_datetime.day)
-                date_list.append(username_date)
-        date_list.sort(reverse=True)
-
-        for date in date_list:
-            if date < self.question_date:
-                text = text.replace(
-                    f'<@{usercode}>', f'@```{user_master[(usercode, date.strftime("%Y-%m-%d"))]}``` ')
-                break
-        '''
+        text = text.replace(usercode, f'```{user_master.get(usercode)}```')
     return text
 
 
