@@ -12,6 +12,8 @@ from bs4 import BeautifulSoup
 # import dicttoxml
 import xmltodict
 
+num_of_topics = 5
+
 
 class PageDataContainer:
 
@@ -60,7 +62,7 @@ class PageDataContainer:
         doc = topic_detector.detect(retxt)
         df_result = topic_detector.get_result(doc)
 
-        return []
+        return df_result.text.value_counts().index.tolist()[:num_of_topics]
 
     def generate_xml_text(self):
         text = '{{Infobox Q&A\n'
@@ -109,12 +111,14 @@ class PageDataContainer:
 
 
 class TopicDetector:
-    def __init__(self, df_annotation_master):
+    def __init__(self, df_annotation_master, target_label_list):
         # set dicts
         self.str_replace_dict = dict(
             zip(df_annotation_master.keyword, df_annotation_master.property))
         topic_dict = [{"label": "Tech", "pattern": x}
                       for x in df_annotation_master.property.unique()]
+
+        self.target_labels = target_label_list
 
         # nlp model
         self.nlp = spacy.load('ja_ginza')
@@ -148,8 +152,11 @@ class TopicDetector:
         return doc
 
     def get_result(self, doc):
-        return pd.DataFrame([[ent.text, ent.label_, str(ent.start_char), str(ent.end_char)] for ent in doc.ents],
-                            columns=['text', 'label', 'start_pos', 'end_pos'])
+        if doc is None:
+            return []
+        df_result = pd.DataFrame([[ent.text, ent.label_, str(ent.start_char), str(ent.end_char)] for ent in doc.ents],
+                                 columns=['text', 'label', 'start_pos', 'end_pos'])
+        return df_result[df_result['label'].isin(self.target_labels)]
 
 # 投稿本文のusername を置換するための関数
 
@@ -163,7 +170,7 @@ def replace_username(text, user_master) -> 'replaced_text':
     return text
 
 
-def setup(user_master_filepath, anotation_master_filepath, output_template_filepath):
+def setup(user_master_filepath, output_template_filepath):
 
     def create_user_master(df) -> {'target_date': {'user_id': 'user_name'}}:
         user_dict = dict()
@@ -177,12 +184,10 @@ def setup(user_master_filepath, anotation_master_filepath, output_template_filep
 
     user_master = create_user_master(pd.read_csv(user_master_filepath))
 
-    anotation_master = pd.read_csv(anotation_master_filepath)
-
     with open(output_template_filepath, encoding='utf-8') as xml:
         output_template = create_template_xml_dxit(xml)
 
-    return (user_master, anotation_master, output_template)
+    return (user_master, output_template)
 
 
 def df_to_container(i, df, user_master, anotation) -> 'container class':
@@ -196,29 +201,41 @@ def dict_to_xml(i, container_dict, output_folderpath):
         f.write(str(soup))
 
 
-def main(input_csv_filepath, user_master_filepath, anotation_master_filepath, output_template_filepath, output_folderpath):
+def main(input_csv_filepath, user_master_filepath, annotation_master_filepath, output_template_filepath, output_folderpath):
     df_talks = pd.read_csv(input_csv_filepath, parse_dates=[
         'talk_ts', 'thread_ts'])
 
     max_target_date = df_talks.target_date.max()
 
-    # user_master, anotation_master, xml_template をdict型で読み込み
-    user_master, anotation_master, output_template = setup(user_master_filepath, anotation_master_filepath,
-                                                           output_template_filepath)
+    # user_master,  xml_template をdict型で読み込み
+    user_master, output_template = setup(
+        user_master_filepath, output_template_filepath)
 
-    topic_detector = TopicDetector(anotation_master)
+    annotation_master = pd.read_csv(annotation_master_filepath)
+    annotation_target_labels = tuple(
+        pd.read_csv(annotation_target_labels_filepath, header=None).loc[:, 0]
+    )
+
+    topic_detector = TopicDetector(annotation_master, annotation_target_labels)
     container_list = []  # PageDataContainerを格納するリスト
     output_dict_list = []  # 出力dictを格納するdict
     num_of_pages_in_xml = 1  # 1xmlファイルあたりのページ数 どう使うかよくわからない
 
     # スレッドごとにコンテナクラスのオブジェクトにする
-    thread_ts_list = df_talks['thread_ts'].unique()
-    for i, ts in enumerate(thread_ts_list):
+    thread_ts_list = sorted(df_talks['thread_ts'].unique())
+    thread_idx = 1
+    for ts in thread_ts_list:
         df_thread = df_talks[df_talks['thread_ts'] == ts]\
             .sort_values(by='talk_ts').reset_index()
+
+        if len(df_thread) < 2:
+            continue
+
         container = df_to_container(
-            i, df_thread, user_master, topic_detector)
+            thread_idx, df_thread, user_master, topic_detector)
         container_list.append(container)
+        thread_idx += 1
+        break
 
     # 各コンテナをdict形にする
     for container in container_list:
@@ -234,9 +251,9 @@ def main(input_csv_filepath, user_master_filepath, anotation_master_filepath, ou
 if __name__ == '__main__':
     input_csv_filepath = r'../csv/question_talk_data.csv'
     user_master_filepath = r'../csv/user_name_master.csv'
-    anotation_master_filepath = r'../csv/annotation_master.csv'
-
+    annotation_master_filepath = r'../csv/annotation_master.csv'
+    annotation_target_labels_filepath = r'../csv/label_master.txt'
     output_template_filepath = r'../template/import-template.xml'
     output_folderpath = r'../xml/'
     main(input_csv_filepath, user_master_filepath,
-         anotation_master_filepath, output_template_filepath, output_folderpath)
+         annotation_master_filepath, output_template_filepath, output_folderpath)
