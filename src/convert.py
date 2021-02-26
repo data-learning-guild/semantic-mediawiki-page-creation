@@ -13,28 +13,6 @@ import xmltodict
 class PageDataContainer:
 
     def __init__(self, i, df_thread, user_master, anotation_master):
-        # 投稿本文のusername を置換するための関数
-        def replace_username(text, user_master) -> 'replaced_text':
-            pattern = r'(?<=<@)(.+?)(?=>)'
-            usercodes = re.findall(pattern, text)
-
-            for usercode in usercodes:
-                date_list = []
-                for key in user_master:
-                    if usercode in key:
-                        username_datetime = dt.datetime.strptime(
-                            key[1], '%Y-%m-%d')
-                        username_date = dt.date(
-                            username_datetime.year, username_datetime.month, username_datetime.day)
-                        date_list.append(username_date)
-                date_list.sort(reverse=True)
-
-                for date in date_list:
-                    if date < self.question_date:
-                        text = text.replace(
-                            f'<@{usercode}>', f'@```{user_master[(usercode, date.strftime("%Y-%m-%d"))]}``` ')
-                        break
-            return text
 
         # ページタイトルに使用するindex
         self.id = i
@@ -58,22 +36,17 @@ class PageDataContainer:
             self.answer_members = [df_thread.iloc[1:]['user_name']]
         else:
             self.answer_members = df_thread.iloc[1:]['user_name'].tolist()
-        '''
-        if len(df_thread[df_thread.reply_num == 0]) == 0:
-            self.question_members = '',
-            self.answer_members = tuple(
-                user for user in df_thread.user_name.unique())
-        else:
-            self.question_members = tuple(
-                user for user in df_thread[df_thread.reply_num == 0].user_name)
-            self.answer_members = tuple(user for user in df_thread.user_name.unique()
-                                        if user != df_thread[df_thread.reply_num == 0].user_name.tolist()[0])
-        '''
+
         # 会話の中から単語リストに該当する単語のタプル。出現順位順
-        cnt_dict = {word: " ".join(df_thread.talk_text.to_list()).count(
-            word) for word in anotation_master.values()}
+        cnt_dict = {word: " ".join(df_thread.talk_text.to_list()).count(word)
+                    for word in anotation_master.values()}
         self.tech_topics = tuple(word_tuple[0] for word_tuple in sorted({k: v for k, v in cnt_dict.items()
                                                                          if v != 0}.items(), key=lambda x: x[1], reverse=True))
+
+        df_thread['date_user'] = user_master['target_date'].max()
+        df_thread['talk_text_rpls'] = user_master.apply(
+            lambda r: replace_username(r.talk_text, user_master))
+
         # 質問本文
         self.question_contains = tuple(replace_username(
             text, user_master) for text in df_thread[df_thread.reply_num == 0].talk_text)
@@ -124,10 +97,44 @@ class PageDataContainer:
         return container_dict
 
 
+# 投稿本文のusername を置換するための関数
+def replace_username(text, user_master) -> 'replaced_text':
+
+    pattern = r'(?<=<@)(.+?)(?=>)'
+    usercodes = re.findall(pattern, text)
+
+    for usercode in usercodes:
+        print('a')
+        '''
+        date_list = []
+        for key in user_master:
+            if usercode in key:
+                username_datetime = dt.datetime.strptime(
+                    key[1], '%Y-%m-%d')
+                username_date = dt.date(
+                    username_datetime.year, username_datetime.month, username_datetime.day)
+                date_list.append(username_date)
+        date_list.sort(reverse=True)
+
+        for date in date_list:
+            if date < self.question_date:
+                text = text.replace(
+                    f'<@{usercode}>', f'@```{user_master[(usercode, date.strftime("%Y-%m-%d"))]}``` ')
+                break
+        '''
+    return text
+
+
 def setup(user_master_filepath, anotation_master_filepath, output_template_filepath):
 
-    def create_user_master(df) -> {('user_id', 'target_date'): 'user_name'}:
-        return dict(zip(tuple(zip(df['user_id'], df['target_date'])), df['user_name']))
+    def create_user_master(df) -> {'target_date': {'user_id': 'user_name'}}:
+        user_dict = dict()
+        for td in df['target_date'].unique():
+            df_tmp = df[df['target_date'] == td]
+            user_dict[td] = dict(zip(df_tmp['user_id'], df_tmp['user_name']))
+        return user_dict
+
+#        return dict(zip(tuple(zip(df['user_id'], df['target_date'])), df['user_name']))
 
     def create_anotation_dict(df) -> {'keyword': 'property'}:
         return dict(zip(df['keyword'], df['property']))
@@ -159,11 +166,13 @@ def dict_to_xml(i, container_dict, output_folderpath):
 
 def main(input_csv_filepath, user_master_filepath, anotation_master_filepath, output_template_filepath, output_folderpath):
     df_talks = pd.read_csv(input_csv_filepath, parse_dates=[
-                           'talk_ts', 'thread_ts', 'target_date'])
+        'talk_ts', 'thread_ts'])
+
+    max_target_date = df_talks.target_date.max()
 
     # user_master, anotation_master, xml_template をdict型で読み込み
-    user_master, anotation_master, output_template = setup(
-        user_master_filepath, anotation_master_filepath, output_template_filepath)
+    user_master, anotation_master, output_template = setup(user_master_filepath, anotation_master_filepath,
+                                                           output_template_filepath)
 
     container_list = []  # PageDataContainerを格納するリスト
     output_dict_list = []  # 出力dictを格納するdict
