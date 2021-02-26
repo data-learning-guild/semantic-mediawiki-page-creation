@@ -33,9 +33,9 @@ class PageDataContainer:
         if len(df_thread) < 2:
             self.answer_members = []
         elif len(df_thread) == 2:
-            self.answer_members = [df_thread.iloc[1:]['user_name']]
+            self.answer_members = [df_thread.loc[1, 'user_name']]
         else:
-            self.answer_members = df_thread.iloc[1:]['user_name'].tolist()
+            self.answer_members = df_thread.loc[1:]['user_name'].tolist()
 
         # 会話の中から単語リストに該当する単語のタプル。出現順位順
         cnt_dict = {word: " ".join(df_thread.talk_text.to_list()).count(word)
@@ -47,39 +47,40 @@ class PageDataContainer:
             lambda r: replace_username(r.talk_text, user_master.get(r.target_date)), axis=1)
 
         # 質問本文
-        self.question_contains = df_thread.loc[0, 'talk_text_rpls']
+        self.question_contents = df_thread.loc[0, 'talk_text_rpls']
         # 回答本文
-        self.answer_contains = df_thread.loc[1:, 'talk_text_rpls'].tolist()
+        self.answer_contents = df_thread.loc[1:, 'talk_text_rpls'].tolist()
 
     def to_dict(self, output_template):
         container_dict = output_template
 
-        text = f'{{{{Infobox Q&A\n\
-| question_channel = [[チャンネル一覧##{unescape(self.question_channel)}|{unescape(self.question_channel)}]] <!-- チャンネル名 -->\n\
-| question_date = {self.question_date} <!-- 質問投稿日 -->\n\
-| question_member_1 = [[利用者:{unescape(self.question_members[0])}]] <!-- 質問者 -->\n'
+        text = '{{{{Infobox Q&A\n'
+        text += f'| question_channel = [[チャンネル一覧##{unescape(self.question_channel)}|{unescape(self.question_channel)}]] <!-- チャンネル名 -->\n'
+        text += f'| question_date = {self.question_date} <!-- 質問投稿日 -->\n'
+        text += f'| question_member_1 = [[利用者:{unescape(self.question_member)}]] <!-- 質問者 -->\n'
 
-        unique_answer_members = set(
-            self.answer_members) - {self.question_member}
+        unique_answer_members = set(self.answer_members) \
+            - {self.question_member}
+
         for i, answer_member in enumerate(unique_answer_members):
             text += f'| answer_member_{i+1} = [[利用者:{unescape(answer_member)}]]\n'
 
         for i in range(min(len(self.tech_topics), 5)):
             text += f'tech_topic_{i+1} = [[質問トピック::{unescape(self.tech_topics[i])}]]\n'
 
-        text += f'}}}}\n\
-\n\
-==質問==\n\
-<blockquote>\n'
-        for question_contains in self.question_contains:
-            text += f'{unescape(question_contains)}\n'
+        text += '}}}}'
+        text += '\n\n'
+        text += '==質問==\n'
+        text += '<blockquote>\n'
 
-        text += f'<!-- 質問テキスト -->\n\
-</blockquote>\n\
-\n\
-==回答==\n'
+        text += f'{unescape(self.question_contents)}\n'
 
-        for i, answer_contains in enumerate(self.answer_contains):
+        text += '<!-- 質問テキスト -->\n'
+        text += '</blockquote>\n'
+        text += '\n'
+        text += '==回答==\n'
+
+        for i, answer_contains in enumerate(self.answer_contents):
             text += f'===回答{i}:XXXさん==='
             text += f'{unescape(answer_contains)}\n'
 
