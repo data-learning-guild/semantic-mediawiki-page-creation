@@ -40,11 +40,7 @@ class PageDataContainer:
         else:
             self.answer_members = df_thread.loc[1:]['user_name'].tolist()
 
-        # 会話の中から単語リストに該当する単語のタプル。出現順位順
-        cnt_dict = {word: " ".join(df_thread.talk_text.to_list()).count(word)
-                    for word in topic_detector.values()}
-
-        self.tech_topics = annotate_topics()
+        self.tech_topics = annotate_topics(topic_detector)
 
         df_thread['talk_text_rpls'] = df_thread.apply(
             lambda r: replace_username(r.talk_text, user_master.get(r.target_date)), axis=1)
@@ -118,11 +114,38 @@ class TopicDetector:
         regex = re.compile('|'.join(map(re.escape, replace_dict)))
         return regex.sub(lambda match: replace_dict[match.group(0)], text)
 
+    def delete_symbols(self, text):
+            # sub 'url link'
+            retxt = re.sub(r'<http.+?>', '', text)
+            # sub 'mention'
+            retxt = re.sub(r'<@\w+?>', '', retxt)
+            # sub 'reaction'
+            retxt = re.sub(r':\S+?:', '', retxt)
+            # sub 'mention'
+            retxt = re.sub(r'<#\S+?>', '', retxt)
+            # sub 'html key words'
+            retxt = re.sub(r'(&).+?\w(;)', '', retxt)
+            # sub spaces
+            retxt = re.sub(r'\s', '', retxt)
+        return retxt
+
+    def detect(self, text):
+        if text == '':
+            return None
+        doc = self.nlp(text)
+        return doc
+
+
+    def get_result(self, doc):
+        result_list = []
+        for sent in doc.sents:
+            result_list = result_list + [[str(token.i), token.text, token.lemma_, token.pos_, token.tag_] for token in sent]
+        df_result = pd.DataFrame(result_list, columns = ['token_no', 'text' ,'lemma', 'pos', 'tag'])
+        df_result[(df_result.pos == 'NOUN')|(df_result.pos == 'PROPN')] # select only Noun & Pronpn
+        return df_result
+
 # 投稿本文のusername を置換するための関数
-
-
 def replace_username(text, user_master) -> 'replaced_text':
-
     pattern = r'(?<=<@)(.+?)(?=>)'
     usercodes = re.findall(pattern, text)
 
