@@ -25,11 +25,11 @@ class PageDataContainer:
         # dt.datetime.strptime(df_thread['thread_ts'][0][:10], '%Y-%m-%d')
         self.question_date = dt.date(
             question_datetime.year, question_datetime.month, question_datetime.day)
-        # 質問したメンバーの表示名のタプル
-        # 回答したメンバーの表示名のタプル
 
+        # 質問したメンバーの表示名
         question_talk = df_thread.iloc[0]
         self.question_member = question_talk['user_name']
+        # 回答したメンバーの表示名のlist
         if len(df_thread) < 2:
             self.answer_members = []
         elif len(df_thread) == 2:
@@ -50,15 +50,12 @@ class PageDataContainer:
         self.question_contains = df_thread.loc[0, 'talk_text_rpls']
         # 回答本文
         self.answer_contains = df_thread.loc[1:, 'talk_text_rpls'].tolist()
-        # テンプレート読み込み
-        # with open(r'../template/import-template.xml', encoding='utf-8') as xml:
-        #    self.dict = xmltodict.parse(xml.read())
 
     def to_dict(self, output_template):
         container_dict = output_template
 
         text = f'{{{{Infobox Q&A\n\
-| question_channel = ﻿[[チャンネル一覧##{unescape(self.question_channel)}|{unescape(self.question_channel)}]] <!-- チャンネル名 -->\n\
+| question_channel = [[チャンネル一覧##{unescape(self.question_channel)}|{unescape(self.question_channel)}]] <!-- チャンネル名 -->\n\
 | question_date = {self.question_date} <!-- 質問投稿日 -->\n\
 | question_member_1 = [[利用者:{unescape(self.question_members[0])}]] <!-- 質問者 -->\n'
 
@@ -113,8 +110,6 @@ def setup(user_master_filepath, anotation_master_filepath, output_template_filep
             df_tmp = df[df['target_date'] == td]
             user_dict[td] = dict(zip(df_tmp['user_id'], df_tmp['user_name']))
         return user_dict
-
-#        return dict(zip(tuple(zip(df['user_id'], df['target_date'])), df['user_name']))
 
     def create_anotation_dict(df) -> {'keyword': 'property'}:
         return dict(zip(df['keyword'], df['property']))
