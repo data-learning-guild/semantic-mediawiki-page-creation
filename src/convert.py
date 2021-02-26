@@ -3,6 +3,9 @@ import datetime as dt
 import numpy as np
 import pandas as pd
 import re
+import spacy
+import ginza
+from spacy.pipeline import EntityRuler
 from xml.sax.saxutils import unescape
 
 from bs4 import BeautifulSoup
@@ -12,7 +15,7 @@ import xmltodict
 
 class PageDataContainer:
 
-    def __init__(self, i, df_thread, user_master, anotation_master):
+    def __init__(self, i, df_thread, user_master, topic_detector):
 
         # ページタイトルに使用するindex
         self.id = i
@@ -39,9 +42,9 @@ class PageDataContainer:
 
         # 会話の中から単語リストに該当する単語のタプル。出現順位順
         cnt_dict = {word: " ".join(df_thread.talk_text.to_list()).count(word)
-                    for word in anotation_master.values()}
-        self.tech_topics = tuple(word_tuple[0] for word_tuple in sorted({k: v for k, v in cnt_dict.items()
-                                                                         if v != 0}.items(), key=lambda x: x[1], reverse=True))
+                    for word in topic_detector.values()}
+
+        self.tech_topics = annotate_topics()
 
         df_thread['talk_text_rpls'] = df_thread.apply(
             lambda r: replace_username(r.talk_text, user_master.get(r.target_date)), axis=1)
@@ -97,7 +100,27 @@ class PageDataContainer:
         return container_dict
 
 
+class TopicDetector:
+    def __init__(self, df_annotation_master):
+        # set dicts
+        self.str_replace_dict = dict(
+            zip(df_annotation_master.keyword, df_annotation_master.property))
+        self.topic_dict = [{"label": "Tech", "pattern": x}
+                           for x in df_annotation_master.property.unique()]
+
+        # nlp model
+        self.nlp = spacy.load('ja_ginza')
+        self.ruler = EntityRuler(self.nlp, overwrite_ents=True)
+        self.ruler.add_patterns(topic_dict)
+        self.nlp.add_pipe(self.ruler)
+
+    def replace_inconsistencies(text, replace_dict):
+        regex = re.compile('|'.join(map(re.escape, replace_dict)))
+        return regex.sub(lambda match: replace_dict[match.group(0)], text)
+
 # 投稿本文のusername を置換するための関数
+
+
 def replace_username(text, user_master) -> 'replaced_text':
 
     pattern = r'(?<=<@)(.+?)(?=>)'
@@ -117,16 +140,12 @@ def setup(user_master_filepath, anotation_master_filepath, output_template_filep
             user_dict[td] = dict(zip(df_tmp['user_id'], df_tmp['user_name']))
         return user_dict
 
-    def create_anotation_dict(df) -> {'keyword': 'property'}:
-        return dict(zip(df['keyword'], df['property']))
-
     def create_template_xml_dxit(xml) -> 'dict':
         return xmltodict.parse(xml.read())
 
     user_master = create_user_master(pd.read_csv(user_master_filepath))
 
-    anotation_master = create_anotation_dict(
-        pd.read_csv(anotation_master_filepath))
+    anotation_master = pd.read_csv(anotation_master_filepath)
 
     with open(output_template_filepath, encoding='utf-8') as xml:
         output_template = create_template_xml_dxit(xml)
@@ -155,6 +174,7 @@ def main(input_csv_filepath, user_master_filepath, anotation_master_filepath, ou
     user_master, anotation_master, output_template = setup(user_master_filepath, anotation_master_filepath,
                                                            output_template_filepath)
 
+    topic_detector = TopicDetector(anotation_master)
     container_list = []  # PageDataContainerを格納するリスト
     output_dict_list = []  # 出力dictを格納するdict
     num_of_pages_in_xml = 1  # 1xmlファイルあたりのページ数 どう使うかよくわからない
@@ -165,7 +185,7 @@ def main(input_csv_filepath, user_master_filepath, anotation_master_filepath, ou
         df_thread = df_talks[df_talks['thread_ts'] == ts]\
             .sort_values(by='talk_ts').reset_index()
         container = df_to_container(
-            i, df_thread, user_master, anotation_master)
+            i, df_thread, user_master, topic_detector)
         container_list.append(container)
 
     # 各コンテナをdict形にする
