@@ -51,9 +51,7 @@ class PageDataContainer:
         # 回答本文
         self.answer_contents = df_thread.loc[1:, 'talk_text_rpls'].tolist()
 
-    def to_dict(self, output_template):
-        container_dict = output_template
-
+    def generate_xml_text(self):
         text = '{{Infobox Q&A\n'
         text += f'| question_channel = [[チャンネル一覧##{unescape(self.question_channel)}|{unescape(self.question_channel)}]] <!-- チャンネル名 -->\n'
         text += f'| question_date = {self.question_date} <!-- 質問投稿日 -->\n'
@@ -80,14 +78,21 @@ class PageDataContainer:
         text += '\n'
         text += '==回答==\n'
 
-        for i, answer_contains in enumerate(self.answer_contents):
-            text += f'===回答{i}:XXXさん===\n'
-            text += f'{unescape(answer_contains)}\n\n'
+        if len(self.answer_members) != len(self.answer_contents):
+            raise('Answer members & contents are different')
 
-        text += f'<!-- 回答テキスト -->\n\n[[カテゴリ:Q&Aまとめ]]'
+        for i, (answer_member, content) in enumerate(zip(self.answer_members, self.answer_contents)):
+            text += f'===回答{i+1}:{unescape(answer_member)}さん===\n'
+            text += f'{unescape(content)}\n\n'
 
+        text += '<!-- 回答テキスト -->\n\n'
+        text += '[[カテゴリ:Q&Aまとめ]]'
+        return text
+
+    def to_dict(self, output_template):
+        container_dict = output_template
         container_dict['mediawiki']['page']['title'] = self.title
-        container_dict['mediawiki']['page']['revision']['text']['#text'] = text
+        container_dict['mediawiki']['page']['revision']['text']['#text'] = self.generate_xml_text()
 
         return container_dict
 
