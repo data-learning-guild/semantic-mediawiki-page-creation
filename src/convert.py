@@ -54,7 +54,7 @@ class PageDataContainer:
     def to_dict(self, output_template):
         container_dict = output_template
 
-        text = '{{{{Infobox Q&A\n'
+        text = '{{Infobox Q&A\n'
         text += f'| question_channel = [[チャンネル一覧##{unescape(self.question_channel)}|{unescape(self.question_channel)}]] <!-- チャンネル名 -->\n'
         text += f'| question_date = {self.question_date} <!-- 質問投稿日 -->\n'
         text += f'| question_member_1 = [[利用者:{unescape(self.question_member)}]] <!-- 質問者 -->\n'
@@ -66,9 +66,9 @@ class PageDataContainer:
             text += f'| answer_member_{i+1} = [[利用者:{unescape(answer_member)}]]\n'
 
         for i in range(min(len(self.tech_topics), 5)):
-            text += f'tech_topic_{i+1} = [[質問トピック::{unescape(self.tech_topics[i])}]]\n'
+            text += f'| tech_topic_{i+1} = [[質問トピック::{unescape(self.tech_topics[i])}]]\n'
 
-        text += '}}}}'
+        text += '}}'
         text += '\n\n'
         text += '==質問==\n'
         text += '<blockquote>\n'
@@ -81,8 +81,8 @@ class PageDataContainer:
         text += '==回答==\n'
 
         for i, answer_contains in enumerate(self.answer_contents):
-            text += f'===回答{i}:XXXさん==='
-            text += f'{unescape(answer_contains)}\n'
+            text += f'===回答{i}:XXXさん===\n'
+            text += f'{unescape(answer_contains)}\n\n'
 
         text += f'<!-- 回答テキスト -->\n\n[[カテゴリ:Q&Aまとめ]]'
 
@@ -171,6 +171,7 @@ def main(input_csv_filepath, user_master_filepath, anotation_master_filepath, ou
     # dictをxmlとして書き出す。
     for i, container_dict in enumerate(output_dict_list):
         dict_to_xml(i, container_dict, output_folderpath)
+        break
 
 
 if __name__ == '__main__':
