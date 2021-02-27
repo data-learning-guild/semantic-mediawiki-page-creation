@@ -44,9 +44,10 @@ class TopicDetector:
         retxt = re.sub(r'<http.+?>', '', text)
         # sub 'mention'
         retxt = re.sub(r'<@\w+?>', '', retxt)
+        retxt = re.sub(r'<!\w+?>', '', retxt)
         # sub 'reaction'
         retxt = re.sub(r':\S+?:', '', retxt)
-        # sub 'mention'
+        # sub 'channel'
         retxt = re.sub(r'<#\S+?>', '', retxt)
         # sub 'html key words'
         retxt = re.sub(r'(&).+?\w(;)', '', retxt)
