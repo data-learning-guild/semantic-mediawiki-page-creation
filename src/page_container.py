@@ -35,6 +35,9 @@ class PageDataContainer:
         self.question_date = date(
             question_datetime.year, question_datetime.month, question_datetime.day)
 
+        self.raw_first_text = topic_detector.delete_symbols(
+            df_thread['talk_text'][0])
+
         # 質問したメンバーの表示名
         question_talk = df_thread.iloc[0]
         self.question_user_real_name = user_master[question_talk['target_date']].get_real_name(
@@ -65,10 +68,18 @@ class PageDataContainer:
             lambda r: replace_username(r.talk_text, user_master.get(r.target_date)), axis=1)
 
         # annotate
+
+        if page_type == PageType.QUESTION:
+            annotate_property = '質問トピック'
+        elif page_type == PageType.INTRO:
+            annotate_property = '自己紹介トピック'
+        else:
+            raise Exception('page type annotation')
+
         for term in topic_terms:
             df_thread['talk_text_rpls'] = \
                 df_thread['talk_text_rpls'].str.replace(
-                    term,  f'[[質問トピック::{term}]]', regex=False)
+                    term,  f'[[{annotate_property}::{term}]]', regex=False)
 
         self.question_contents = df_thread.loc[0, 'talk_text_rpls']  # 質問本文
         self.answer_contents = \
@@ -162,9 +173,14 @@ class PageDataContainer:
         new_page['id'] = self.id
 
         if self.page_type == PageType.QUESTION:
+            title_str = re.sub(r'\s', '', self.raw_first_text)
+            title_str = title_str.replace('[', '')
+            title_str = title_str.replace(']', '')
+            if len(title_str) >= 20:
+                title_str = title_str[:20] + '...'
+
             # title_idxから"Q&A-xxxx"を設定
-            title = f'Q&A-{self.id:06d}:' + \
-                '-'.join(sorted(self.tech_topics))
+            title = f'Q&A-{self.id:06d}:' + title_str
             page_contents = self.generate_question_xml_text()
         elif self.page_type == PageType.INTRO:
             title = f'利用者:{self.question_user_real_name}'
@@ -201,5 +217,5 @@ def replace_username(text, user_master) -> 'replaced_text':
 
     for usercode in usercodes:
         text = text.replace(
-            usercode, f"''{user_master.get_display_name(usercode)}'''")
+            usercode, f"'''{user_master.get_display_name(usercode)}'''")
     return text
