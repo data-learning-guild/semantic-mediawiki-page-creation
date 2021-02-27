@@ -8,13 +8,12 @@ from bs4 import BeautifulSoup
 import spacy
 import ginza
 from spacy.pipeline import EntityRuler
-from xml.sax.saxutils import unescape
 
 from page_container import PageDataContainer
 from page_container import UserInfoContainer
 
-num_of_topics = 5
-num_of_pages_in_xml = 10  # 1xmlファイルあたりのページ数
+num_of_pages_in_xml = 20  # 1xmlファイルあたりのページ数
+num_of_min_talks = 2
 
 
 class TopicDetector:
@@ -60,12 +59,14 @@ class TopicDetector:
 
     def get_ent_result(self, doc):
         if doc is None:
-            return []
+            return pd.DataFrame()
         df_result = pd.DataFrame([[ent.text, ent.label_, str(ent.start_char), str(ent.end_char)] for ent in doc.ents],
                                  columns=['text', 'label', 'start_pos', 'end_pos'])
         return df_result[df_result['label'].isin(self.target_labels)]
 
     def get_token_result(self, doc):
+        if doc is None:
+            return pd.DataFrame()
         result_list = []
         for sent in doc.sents:
             result_list = result_list + \
@@ -77,18 +78,6 @@ class TopicDetector:
 
     def get_annotation_value(self, key_str):
         return self.__str_annotation_dict.get(key_str)
-
-# 投稿本文のusername を置換するための関数
-
-
-def replace_username(text, user_master) -> 'replaced_text':
-    pattern = r'(?<=<@)(.+?)(?=>)'
-    usercodes = re.findall(pattern, text)
-
-    for usercode in usercodes:
-        text = text.replace(
-            usercode, f"''{user_master.get_display_name(usercode)}'''")
-    return text
 
 
 def setup(user_master_filepath, output_template_filepath):
@@ -146,8 +135,8 @@ def main(input_csv_filepath, user_master_filepath, annotation_master_filepath, o
         df_thread = df_talks[df_talks['thread_ts'] == ts]\
             .sort_values(by='talk_ts').reset_index()
 
-        # if len(df_thread) < 2:
-        #    continue
+        if len(df_thread) < num_of_min_talks:
+            continue
 
         container = df_to_container(
             thread_idx, df_thread, user_master, topic_detector)

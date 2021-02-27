@@ -1,5 +1,9 @@
 import pandas as pd
+import re
 from datetime import date
+from xml.sax.saxutils import unescape
+
+num_of_topics = 5
 
 
 class PageDataContainer:
@@ -65,11 +69,14 @@ class PageDataContainer:
         doc = topic_detector.detect(retxt)
         df_env_result = topic_detector.get_ent_result(doc)
         df_token_result = topic_detector.get_token_result(doc)
-        return df_env_result.text.value_counts().index.tolist()
+
+        result_list = df_env_result.text.value_counts().index.tolist()\
+            if len(df_env_result) > 0 else []
+        return result_list
 
     def generate_xml_text(self):
         text = '{{Infobox Q&A\n'
-        text += f'| question_channel = [[チャンネル一覧##{unescape(self.question_channel)}|{unescape(self.question_channel)}]] <!-- チャンネル名 -->\n'
+        text += f'| question_channel = [[チャンネル一覧##{unescape(self.channel_name)}|{unescape(self.channel_name)}]] <!-- チャンネル名 -->\n'
         text += f'| question_date = {self.question_date} <!-- 質問投稿日 -->\n'
         text += f'| question_member_1 = [[利用者:{unescape(self.question_user_real_name)}]] <!-- 質問者 -->\n'
 
@@ -134,3 +141,14 @@ class UserInfoContainer:
 
     def get_real_name(self, user_id):
         return self.__real_name_dict.get(user_id)
+
+
+# 投稿本文のusername を置換するための関数
+def replace_username(text, user_master) -> 'replaced_text':
+    pattern = r'(?<=<@)(.+?)(?=>)'
+    usercodes = re.findall(pattern, text)
+
+    for usercode in usercodes:
+        text = text.replace(
+            usercode, f"''{user_master.get_display_name(usercode)}'''")
+    return text
