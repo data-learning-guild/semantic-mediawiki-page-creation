@@ -2,13 +2,16 @@ import copy
 import numpy as np
 import pandas as pd
 import re
+
 import xmltodict
 from bs4 import BeautifulSoup
+from argparse import ArgumentParser
 
 import spacy
 import ginza
 from spacy.pipeline import EntityRuler
 
+from page_container import PageType
 from page_container import PageDataContainer
 from page_container import UserInfoContainer
 
@@ -98,18 +101,21 @@ def setup(user_master_filepath, output_template_filepath):
     return (user_master, output_template, page_template)
 
 
-def df_to_container(i, df, user_master, anotation) -> 'container class':
-    return PageDataContainer(i, df, user_master, anotation)
+def df_to_container(i, page_type, df, user_master, anotation) -> 'container class':
+    return PageDataContainer(i, page_type, df, user_master, anotation)
 
 
-def dict_to_xml(i, container_dict, output_folderpath):
+def dict_to_xml(i, file_name, container_dict, output_folderpath):
     xml = xmltodict.unparse(container_dict, pretty=True)
     soup = BeautifulSoup(xml, 'xml')
-    with open(output_folderpath + f'Q&A-{i:04d}.xml', mode='w') as f:
+    with open(output_folderpath + f'{file_name}-{i:04d}.xml', mode='w') as f:
         f.write(str(soup))
 
 
-def main(input_csv_filepath, user_master_filepath, annotation_master_filepath, output_template_filepath, output_folderpath):
+def main(page_type, input_csv_filepath, user_master_filepath,
+         annotation_master_filepath, output_template_filepath,
+         output_folderpath):
+
     df_talks = pd.read_csv(input_csv_filepath, parse_dates=[
         'talk_ts', 'thread_ts'])
 
@@ -135,11 +141,11 @@ def main(input_csv_filepath, user_master_filepath, annotation_master_filepath, o
         df_thread = df_talks[df_talks['thread_ts'] == ts]\
             .sort_values(by='talk_ts').reset_index()
 
-        if len(df_thread) < num_of_min_talks:
+        if len(df_thread) < page_type.value:
             continue
 
         container = df_to_container(
-            thread_idx, df_thread, user_master, topic_detector)
+            thread_idx, page_type, df_thread, user_master, topic_detector)
         container_list.append(container)
         thread_idx += 1
 
@@ -155,15 +161,25 @@ def main(input_csv_filepath, user_master_filepath, annotation_master_filepath, o
 
     # dictをxmlとして書き出す。
     for i, container_dict in enumerate(output_dict_list):
-        dict_to_xml(i, container_dict, output_folderpath)
+        dict_to_xml(i, page_type.name, container_dict, output_folderpath)
 
 
 if __name__ == '__main__':
-    input_csv_filepath = r'../csv/question_talk_data.csv'
     user_master_filepath = r'../csv/user_name_master.csv'
     annotation_master_filepath = r'../csv/annotation_master.csv'
     annotation_target_labels_filepath = r'../csv/label_master.txt'
     output_template_filepath = r'../template/import-template.xml'
     output_folderpath = r'../xml/'
-    main(input_csv_filepath, user_master_filepath,
-         annotation_master_filepath, output_template_filepath, output_folderpath)
+
+    parser = ArgumentParser(
+        description='Convert slack data csv to Mediawiki xml')
+    parser.add_argument('arg_csv_path', help='File path of csv file')
+    parser.add_argument('arg_page_type', help='Type name of the page')
+
+    args = parser.parse_args()
+    input_csv_filepath = args.arg_csv_path
+    page_type = PageType.str_convert(args.arg_page_type)
+
+    main(page_type, input_csv_filepath,
+         user_master_filepath, annotation_master_filepath,
+         output_template_filepath, output_folderpath)

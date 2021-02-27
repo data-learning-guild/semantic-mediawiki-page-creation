@@ -1,16 +1,33 @@
 import pandas as pd
 import re
 from datetime import date
+from enum import Enum
+
 from xml.sax.saxutils import unescape
 
 num_of_topics = 5
 
 
+class PageType(Enum):
+    INTRO = 1
+    QUESTION = 2
+
+    def str_convert(arg: str):
+        if arg == 'q':
+            return PageType.QUESTION
+        elif arg == 'i':
+            return PageType.INTRO
+        else:
+            raise Exception('Unknown arg for enum.')
+
+
 class PageDataContainer:
-    def __init__(self, i, df_thread, user_master, topic_detector):
+    def __init__(self, i, page_type, df_thread, user_master, topic_detector):
 
         # ページタイトルに使用するindex
         self.id = i
+        # PageType
+        self.page_type = page_type
         # 質問したチャンネル名
         self.channel_name = df_thread['channel_name'][0]
         # 質問した日付
@@ -44,9 +61,6 @@ class PageDataContainer:
             df_thread['talk_text'].tolist(), topic_detector)
         self.tech_topics = topic_terms[:num_of_topics]
 
-        # title_idxから"Q&A-xxxx"を設定
-        self.title = f'Q&A-{i:06d}:' + '-'.join(sorted(self.tech_topics))
-
         df_thread['talk_text_rpls'] = df_thread.apply(
             lambda r: replace_username(r.talk_text, user_master.get(r.target_date)), axis=1)
 
@@ -74,17 +88,17 @@ class PageDataContainer:
             if len(df_env_result) > 0 else []
         return result_list
 
-    def generate_xml_text(self):
+    def generate_question_xml_text(self):
         text = '{{Infobox Q&A\n'
         text += f'| question_channel = [[チャンネル一覧##{unescape(self.channel_name)}|{unescape(self.channel_name)}]] <!-- チャンネル名 -->\n'
         text += f'| question_date = {self.question_date} <!-- 質問投稿日 -->\n'
-        text += f'| question_member_1 = [[利用者:{unescape(self.question_user_real_name)}]] <!-- 質問者 -->\n'
+        text += f'| question_member_1 = [[質問者::利用者:{unescape(self.question_user_real_name)}]] <!-- 質問者 -->\n'
 
         unique_answer_real_names = [x for x in pd.Series(self.answer_user_real_names).value_counts().index
                                     if x != self.question_user_real_name][:num_of_topics]
 
         for i, answer_real_name in enumerate(unique_answer_real_names[:num_of_topics]):
-            text += f'| answer_member_{i+1} = [[利用者:{unescape(answer_real_name)}]]\n'
+            text += f'| answer_member_{i+1} = [[回答者::利用者:{unescape(answer_real_name)}]]\n'
 
         for i in range(min(len(self.tech_topics), 5)):
             text += f'| tech_topic_{i+1} = [[質問トピック::{unescape(self.tech_topics[i])}]]\n'
@@ -116,11 +130,48 @@ class PageDataContainer:
         text += '[[カテゴリ:Q&Aまとめ]]'
         return text
 
-    def to_dict(self, base_xml_dict, new_page):
+    def generate_intro_xml_text(self):
+        text = '==ユーザのプロパティ==\n'
+        text += f'[[特別:閲覧/:利用者:{unescape(self.question_user_real_name)}|{unescape(self.question_user_real_name)}さんがアノテーションされたページ一覧]]\n'
+        text += '==自己紹介==\n'
+        text += f'==={unescape(self.question_member)}さん===\n'
 
+        text += '<blockquote>\n'
+        text += f'{unescape(self.question_contents)}\n'
+        text += '</blockquote>\n'
+        text += '\n'
+
+        text += '==コメント==\n'
+
+        if len(self.answer_members) != len(self.answer_contents):
+            raise('Answer members & contents are different')
+
+        latest_user = ''
+        answer_idx = 1
+        for answer_member, content in zip(self.answer_members, self.answer_contents):
+            if latest_user != answer_member:  # Combine the same user names
+                text += f'===コメント{answer_idx}: {unescape(answer_member)}さん===\n'
+                latest_user = answer_member
+                answer_idx += 1
+            text += f'{unescape(content)}\n\n'
+
+        text += '[[カテゴリ:自己紹介まとめ]]'
+        return text
+
+    def to_dict(self, base_xml_dict, new_page):
         new_page['id'] = self.id
-        new_page['title'] = self.title
-        new_page['revision']['text']['#text'] = self.generate_xml_text()
+
+        if self.page_type == PageType.QUESTION:
+            # title_idxから"Q&A-xxxx"を設定
+            title = f'Q&A-{self.id:06d}:' + \
+                '-'.join(sorted(self.tech_topics))
+            page_contents = self.generate_question_xml_text()
+        elif self.page_type == PageType.INTRO:
+            title = f'利用者:{self.question_user_real_name}'
+            page_contents = self.generate_intro_xml_text()
+
+        new_page['title'] = title
+        new_page['revision']['text']['#text'] = page_contents
 
         base_xml_dict['mediawiki']['page'].append(new_page)
 
