@@ -17,7 +17,6 @@ num_of_pages_in_xml = 10  # 1xmlファイルあたりのページ数
 
 
 class PageDataContainer:
-
     def __init__(self, i, df_thread, user_master, topic_detector):
 
         # ページタイトルに使用するindex
@@ -89,10 +88,10 @@ class PageDataContainer:
         text += f'| question_date = {self.question_date} <!-- 質問投稿日 -->\n'
         text += f'| question_member_1 = [[利用者:{unescape(self.question_user_real_name)}]] <!-- 質問者 -->\n'
 
-        unique_answer_real_names = set(self.answer_user_real_names) \
-            - {self.question_user_real_name}
+        unique_answer_real_names = [x for x in pd.Series(self.answer_user_real_names).value_counts().index
+                                    if x != self.question_user_real_name][:num_of_topics]
 
-        for i, answer_real_name in enumerate(unique_answer_real_names):
+        for i, answer_real_name in enumerate(unique_answer_real_names[:num_of_topics]):
             text += f'| answer_member_{i+1} = [[利用者:{unescape(answer_real_name)}]]\n'
 
         for i in range(min(len(self.tech_topics), 5)):
@@ -105,7 +104,6 @@ class PageDataContainer:
 
         text += '<blockquote>\n'
         text += f'{unescape(self.question_contents)}\n'
-        text += '<!-- 質問テキスト -->\n'
         text += '</blockquote>\n'
         text += '\n'
 
@@ -123,7 +121,6 @@ class PageDataContainer:
                 answer_idx += 1
             text += f'{unescape(content)}\n\n'
 
-        text += '<!-- 回答テキスト -->\n\n'
         text += '[[カテゴリ:Q&Aまとめ]]'
         return text
 
